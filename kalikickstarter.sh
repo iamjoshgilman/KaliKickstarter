@@ -25,7 +25,9 @@ function BLUE() {
 
 function install_package() {
     apt install -y "$1"
-    if [[ $? -ne 0 ]]; then
+    if [[ $? -eq 0 ]]; then
+        GREEN "$1 installed successfully!"
+    else
         RED "Error installing $1."
         exit 1
     fi
@@ -92,12 +94,6 @@ fi
 BLUE "Installing pip..."
 install_package python-pip
 
-BLUE "Removing boilerplate home directories..."
-rmdir ~/Music ~/Pictures ~/Public ~/Templates ~/Videos
-
-BLUE "Creating useful home directories..."
-mkdir ~/CTF ~/Tools ~/Temp
-
 BLUE "Installing exiftool..."
 install_package exiftool
 
@@ -128,12 +124,24 @@ BLUE "Installing ffmpeg..."
 install_package ffmpeg
 
 BLUE "Installing xrdp..."
-install_package xrdp
+install_package xrdp 
 systemctl enable xrdp
 systemctl restart xrdp
 GREEN "To change default port, edit /etc/xrdp/xrdp.ini"
 
-# Define the alias and environment variables
+# Directory Changes
+read -p "${GREEN}Do you want to remove default directories and create new ones? (y/n): " response_dir
+if [[ "$response_dir" == "y" ]]; then
+    BLUE "Removing boilerplate home directories..."
+    for dir in Music Pictures Public Templates Videos; do
+        rmdir ~/$dir
+    done
+
+    BLUE "Creating useful home directories..."
+    mkdir ~/CTF ~/Tools ~/Temp
+fi
+
+# Alias and environment variables
 ALIASES=(
 "alias nmap=\"grc nmap\""
 "alias please=\"sudo !!\""
@@ -151,27 +159,24 @@ ENV_VARS=(
 # Ask user if they want to add the aliases and environment variables
 read -p "${GREEN}Do you want to add specified aliases and environment variables to ~/.zshrc? (y/n): " response
 
-if [[ "$response" != "y" ]]; then
+if [[ "$response" == "y" ]]; then
+    # Backup .zshrc
+    cp ~/.zshrc ~/.zshrc.bak
+
+    # Append the alias
+    for alias_entry in "${ALIASES[@]}"; do
+        grep -qF "$alias_entry" ~/.zshrc || echo "$alias_entry" >> ~/.zshrc
+    done
+
+    # Append each environment variable
+    for env_var in "${ENV_VARS[@]}"; do
+        grep -qF "$env_var" ~/.zshrc || echo "$env_var" >> ~/.zshrc
+    done
+
+    GREEN "Alias and environment variables have been appended to ~/.zshrc."
+else
     echo "Exiting without adding any aliases or environment variables."
     exit 0
 fi
-
-# Check if .zshrc exists in the user's home directory
-if [[ ! -f ~/.zshrc ]]; then
-    RED "~/.zshrc does not exist! Please create one before proceeding."
-    exit 1
-fi
-
-# Append the alias
-for alias_entry in "${ALIASES[@]}"; do
-    echo "$alias_entry" >> ~/.zshrc
-done
-
-# Append each environment variable
-for env_var in "${ENV_VARS[@]}"; do
-    echo "$env_var" >> ~/.zshrc
-done
-
-echo "${GREEN}Alias and environment variables have been appended to ~/.zshrc."
 
 GREEN "Install complete!"
