@@ -105,7 +105,14 @@ install_package steghide
 BLUE "Installing ffmpeg..."
 install_package ffmpeg
 
-install_package xrdp 
+BLUE "Installing IDA Free..."
+wget -q https://out7.hex-rays.com/files/idafree83_linux.run -O ~/Downloads/idafree.run
+chmod +x ~/Downloads/idafree.run
+~/Downloads/idafree.run
+echo 'export PATH=$PATH:/opt/idafree' >> ~/.zshhrc
+
+BLUE "Installing xrdp..."
+install_package xrdp
 if [[ $? -eq 0 ]]; then
     systemctl enable xrdp
     systemctl restart xrdp
@@ -186,5 +193,7 @@ else
     echo "Exiting without adding any aliases or environment variables."
     exit 0
 fi
+
+source ~/.zshrc
 
 GREEN "Install complete!"
