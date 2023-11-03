@@ -109,7 +109,7 @@ BLUE "Installing IDA Free..."
 wget -q https://out7.hex-rays.com/files/idafree83_linux.run -O ~/Downloads/idafree.run
 chmod +x ~/Downloads/idafree.run
 ~/Downloads/idafree.run
-echo 'export PATH=$PATH:/opt/idafree' >> ~/.zshhrc
+echo 'export PATH=$PATH:/opt/idafree' >> ~/.zshrc
 
 BLUE "Installing xrdp..."
 install_package xrdp
